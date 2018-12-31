@@ -202,47 +202,6 @@ int * separate_freq_bands(fftw_complex *out, int bars, int lcf[200],
  	else return fr;
 } 
 
-
-int * monstercat_filter (int * f, int bars, int waves, double monstercat) {
-
-	int z;
-
-
-	// process [smoothing]: monstercat-style "average"
-
-	int m_y, de;
-	if (waves > 0) {
-		for (z = 0; z < bars; z++) { // waves
-			f[z] = f[z] / 1.25;
-			//if (f[z] < 1) f[z] = 1;
-			for (m_y = z - 1; m_y >= 0; m_y--) {
-				de = z - m_y;
-				f[m_y] = max(f[z] - pow(de, 2), f[m_y]);
-			}
-			for (m_y = z + 1; m_y < bars; m_y++) {
-				de = m_y - z;
-				f[m_y] = max(f[z] - pow(de, 2), f[m_y]);
-			}
-		}
-	} else if (monstercat > 0) {
-		for (z = 0; z < bars; z++) {
-			//if (f[z] < 1)f[z] = 1;
-			for (m_y = z - 1; m_y >= 0; m_y--) {
-				de = z - m_y;
-				f[m_y] = max(f[z] / pow(monstercat, de), f[m_y]);
-			}
-			for (m_y = z + 1; m_y < bars; m_y++) {
-				de = m_y - z;
-				f[m_y] = max(f[z] / pow(monstercat, de), f[m_y]);
-			}
-		}
-	}
-
-	return f;
-
-}
-
-
 // general: entry point
 int main(int argc, char **argv)
 {
@@ -768,19 +727,7 @@ p.framerate);
 					if(i!=0) fl[i]=0;
 				} while(i!=0);
 			}
-			
-			// process [smoothing]
-			if (p.monstercat) {
-				if (p.stereo) {
-					fl = monstercat_filter(fl, bars / 2, p.waves,
-					 	p.monstercat);
-					fr = monstercat_filter(fr, bars / 2, p.waves,
-						p.monstercat);	
-				} else {
-					fl = monstercat_filter(fl, bars, p.waves, p.monstercat);
-				}
-			}
-			
+				
 			//preperaing signal for drawing
 			for (o = 0; o < bars; o++) {
 				if (p.stereo) {
